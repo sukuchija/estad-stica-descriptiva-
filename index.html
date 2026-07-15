@@ -1,0 +1,1992 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratorio de Estadística — 7.º Grado</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ink: #0f1c1a;
+            --ink-muted: #3d524e;
+            --ink-soft: #6b7f7a;
+            --surface: #f7faf9;
+            --surface-elevated: #ffffff;
+            --surface-tint: #e8f2ef;
+            --border: rgba(15, 28, 26, 0.08);
+            --border-strong: rgba(15, 28, 26, 0.14);
+            --accent: #0d6e63;
+            --accent-hover: #0a5a51;
+            --accent-soft: rgba(13, 110, 99, 0.1);
+            --accent-glow: rgba(13, 110, 99, 0.22);
+            --success: #1a7a4c;
+            --success-soft: rgba(26, 122, 76, 0.12);
+            --info: #1e5a8a;
+            --info-soft: rgba(30, 90, 138, 0.1);
+            --warn: #b45309;
+            --warn-soft: rgba(180, 83, 9, 0.12);
+            --danger: #b91c1c;
+            --danger-soft: rgba(185, 28, 28, 0.12);
+            --radius-sm: 10px;
+            --radius-md: 16px;
+            --radius-lg: 24px;
+            --shadow-sm: 0 1px 2px rgba(15, 28, 26, 0.04);
+            --shadow-md: 0 8px 24px rgba(15, 28, 26, 0.06), 0 2px 6px rgba(15, 28, 26, 0.04);
+            --font-sans: "Outfit", system-ui, sans-serif;
+            --font-serif: "Source Serif 4", Georgia, serif;
+            --ease: cubic-bezier(0.22, 1, 0.36, 1);
+            --step-duration: 420ms;
+            --app-max: 1100px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: var(--font-sans);
+            color: var(--ink);
+            line-height: 1.55;
+            min-height: 100dvh;
+            background:
+                radial-gradient(ellipse 80% 50% at 10% -10%, rgba(13, 110, 99, 0.12), transparent 55%),
+                radial-gradient(ellipse 60% 40% at 95% 5%, rgba(26, 122, 76, 0.08), transparent 50%),
+                linear-gradient(165deg, #eef5f3 0%, var(--surface) 40%, #f0f4f2 100%);
+            background-attachment: fixed;
+            padding: clamp(0.75rem, 2vw, 1.75rem);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .app {
+            max-width: var(--app-max);
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        /* Top bar: brand + proyector */
+        .topbar {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 1rem;
+            animation: fadeUp 0.6s var(--ease) both;
+        }
+
+        .brand { flex: 1; min-width: 0; }
+
+        .brand__eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 0.45rem;
+        }
+
+        .brand__eyebrow::before {
+            content: "";
+            width: 16px;
+            height: 2px;
+            background: var(--accent);
+            border-radius: 1px;
+        }
+
+        .brand__title {
+            font-family: var(--font-serif);
+            font-size: clamp(1.55rem, 3.5vw, 2.15rem);
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            line-height: 1.15;
+            margin-bottom: 0.35rem;
+        }
+
+        .brand__subtitle {
+            font-size: 0.9rem;
+            color: var(--ink-muted);
+            max-width: 48ch;
+        }
+
+        .projector-toggle {
+            flex-shrink: 0;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            font-family: var(--font-sans);
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--ink-muted);
+            background: var(--surface-elevated);
+            border: 1.5px solid var(--border-strong);
+            border-radius: 999px;
+            padding: 0.55rem 0.95rem;
+            cursor: pointer;
+            transition: background 0.2s var(--ease), border-color 0.2s var(--ease), color 0.2s var(--ease), box-shadow 0.2s var(--ease);
+        }
+
+        .projector-toggle:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: #fff;
+        }
+
+        .projector-toggle[aria-pressed="true"] {
+            background: var(--accent-soft);
+            border-color: var(--accent);
+            color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .projector-toggle svg { width: 16px; height: 16px; }
+
+        /* Stepper */
+        .stepper {
+            background: var(--surface-elevated);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 0.9rem 0.85rem 1.05rem;
+            box-shadow: var(--shadow-sm);
+            animation: fadeUp 0.6s var(--ease) 0.08s both;
+        }
+
+        .stepper__track {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            position: relative;
+            gap: 0.15rem;
+        }
+
+        .stepper__bar {
+            position: absolute;
+            top: 16px;
+            left: 6%;
+            right: 6%;
+            height: 3px;
+            background: var(--border-strong);
+            border-radius: 2px;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .stepper__bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--accent), #1a9b88);
+            border-radius: 2px;
+            transition: width var(--step-duration) var(--ease);
+        }
+
+        .stepper__item {
+            position: relative;
+            z-index: 1;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.35rem;
+            color: var(--ink-soft);
+            transition: color 0.3s var(--ease);
+        }
+
+        .stepper__dot {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            font-size: 0.72rem;
+            font-weight: 700;
+            background: var(--surface);
+            border: 2px solid var(--border-strong);
+            color: var(--ink-soft);
+            transition: background 0.3s var(--ease), border-color 0.3s var(--ease),
+                color 0.3s var(--ease), box-shadow 0.3s var(--ease), transform 0.3s var(--ease);
+        }
+
+        .stepper__label {
+            font-size: 0.62rem;
+            font-weight: 600;
+            text-align: center;
+            line-height: 1.2;
+            max-width: 4.8rem;
+        }
+
+        .stepper__item.is-active { color: var(--accent); }
+        .stepper__item.is-active .stepper__dot {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+            box-shadow: 0 0 0 4px var(--accent-glow);
+            transform: scale(1.06);
+        }
+        .stepper__item.is-done { color: var(--success); }
+        .stepper__item.is-done .stepper__dot {
+            background: var(--success-soft);
+            border-color: var(--success);
+            color: var(--success);
+        }
+        .stepper__item.is-done .stepper__dot svg { width: 14px; height: 14px; }
+
+        .stepper__time {
+            font-size: 0.58rem;
+            font-weight: 600;
+            color: var(--ink-soft);
+            opacity: 0.9;
+        }
+
+        .stepper__item.is-active .stepper__time { color: var(--accent); }
+
+        /* Timer de clase */
+        .timer-bar {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            background: var(--surface-elevated);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 0.7rem 1rem;
+            box-shadow: var(--shadow-sm);
+            animation: fadeUp 0.6s var(--ease) 0.1s both;
+        }
+
+        .timer-bar.is-warning {
+            border-color: rgba(180, 83, 9, 0.35);
+            background: linear-gradient(90deg, var(--warn-soft), var(--surface-elevated) 40%);
+        }
+
+        .timer-bar.is-critical {
+            border-color: rgba(185, 28, 28, 0.4);
+            background: linear-gradient(90deg, var(--danger-soft), var(--surface-elevated) 40%);
+            animation: timerPulse 1s ease-in-out infinite;
+        }
+
+        .timer-bar.is-hidden { display: none; }
+
+        @keyframes timerPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(185, 28, 28, 0); }
+            50% { box-shadow: 0 0 0 4px rgba(185, 28, 28, 0.12); }
+        }
+
+        .timer-bar__clock {
+            flex-shrink: 0;
+            display: flex;
+            align-items: baseline;
+            gap: 0.35rem;
+            min-width: 5.5rem;
+        }
+
+        .timer-bar__label {
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--ink-soft);
+        }
+
+        .timer-bar__time {
+            font-variant-numeric: tabular-nums;
+            font-size: 1.45rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            color: var(--accent);
+            line-height: 1;
+        }
+
+        .timer-bar.is-warning .timer-bar__time { color: var(--warn); }
+        .timer-bar.is-critical .timer-bar__time { color: var(--danger); }
+
+        .timer-bar__meta {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .timer-bar__phase {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--ink-muted);
+            margin-bottom: 0.4rem;
+        }
+
+        .timer-bar__track {
+            height: 6px;
+            background: var(--border-strong);
+            border-radius: 99px;
+            overflow: hidden;
+        }
+
+        .timer-bar__fill {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, var(--accent), #1a9b88);
+            border-radius: 99px;
+            transition: width 1s linear, background 0.3s var(--ease);
+        }
+
+        .timer-bar.is-warning .timer-bar__fill {
+            background: linear-gradient(90deg, var(--warn), #d97706);
+        }
+
+        .timer-bar.is-critical .timer-bar__fill {
+            background: linear-gradient(90deg, var(--danger), #ef4444);
+        }
+
+        .timer-toast {
+            position: fixed;
+            top: 1.25rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(-120%);
+            z-index: 100;
+            background: var(--ink);
+            color: #fff;
+            font-size: 0.9rem;
+            font-weight: 600;
+            padding: 0.85rem 1.35rem;
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow-md);
+            opacity: 0;
+            pointer-events: none;
+            transition: transform 0.35s var(--ease), opacity 0.35s var(--ease);
+            max-width: min(90vw, 420px);
+            text-align: center;
+        }
+
+        .timer-toast.is-visible {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        /* Panel */
+        .panel {
+            background: var(--surface-elevated);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            padding: clamp(1.1rem, 2.5vw, 1.65rem);
+            position: relative;
+            overflow: hidden;
+            min-height: 280px;
+            animation: fadeUp 0.6s var(--ease) 0.14s both;
+        }
+
+        .panel::before {
+            content: "";
+            position: absolute;
+            inset: 0 0 auto 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent), #2a9d8f 50%, transparent);
+            opacity: 0.85;
+        }
+
+        .step {
+            display: none;
+            opacity: 0;
+            transform: translateY(12px);
+        }
+        .step.active {
+            display: block;
+            animation: stepIn var(--step-duration) var(--ease) both;
+        }
+        .step.leaving {
+            display: block;
+            animation: stepOut 280ms var(--ease) both;
+            pointer-events: none;
+        }
+
+        @keyframes stepIn {
+            from { opacity: 0; transform: translateY(14px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes stepOut {
+            from { opacity: 1; transform: translateY(0); }
+            to   { opacity: 0; transform: translateY(-10px); }
+        }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .step__intro {
+            margin-bottom: 1rem;
+        }
+
+        .step__badge {
+            display: inline-flex;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--accent);
+            background: var(--accent-soft);
+            padding: 0.3rem 0.65rem;
+            border-radius: 999px;
+            margin-bottom: 0.55rem;
+        }
+
+        .step__heading {
+            font-family: var(--font-serif);
+            font-size: clamp(1.25rem, 2.8vw, 1.5rem);
+            font-weight: 600;
+            letter-spacing: -0.015em;
+            margin-bottom: 0.3rem;
+        }
+
+        .step__lead {
+            color: var(--ink-muted);
+            font-size: 0.92rem;
+            max-width: 60ch;
+        }
+
+        /* ═══ Split layout: referencia | trabajo ═══ */
+        .split {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.15rem;
+            align-items: start;
+        }
+
+        .split__ref,
+        .split__work {
+            min-width: 0;
+        }
+
+        .split__work {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .panel-title {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.07em;
+            text-transform: uppercase;
+            color: var(--ink-soft);
+            margin-bottom: 0.65rem;
+        }
+
+        /* Briefing */
+        .briefing {
+            background: linear-gradient(145deg, #f0f7f5 0%, #eaf3f8 100%);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 1.05rem 1rem 1.1rem;
+            margin-bottom: 0.85rem;
+        }
+
+        .briefing__meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            margin-bottom: 0.7rem;
+        }
+
+        .chip {
+            display: inline-flex;
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            padding: 0.28rem 0.55rem;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.75);
+            color: var(--info);
+            border: 1px solid rgba(30, 90, 138, 0.15);
+        }
+
+        .chip--accent {
+            color: var(--accent);
+            border-color: rgba(13, 110, 99, 0.18);
+        }
+
+        .briefing__title {
+            font-family: var(--font-serif);
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.55rem;
+        }
+
+        .briefing__body {
+            font-size: 0.88rem;
+            color: var(--ink-muted);
+            display: flex;
+            flex-direction: column;
+            gap: 0.55rem;
+        }
+
+        .briefing__callout {
+            margin-top: 0.2rem;
+            padding: 0.65rem 0.75rem;
+            background: rgba(255, 255, 255, 0.7);
+            border-left: 3px solid var(--accent);
+            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+            font-size: 0.82rem;
+            color: var(--ink);
+            font-weight: 500;
+        }
+
+        .guide {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+        }
+
+        .guide__item {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 0.6rem 0.7rem;
+        }
+
+        .guide__term {
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 0.2rem;
+        }
+
+        .guide__def {
+            font-size: 0.76rem;
+            color: var(--ink-muted);
+            line-height: 1.35;
+        }
+
+        .concept-grid {
+            display: grid;
+            gap: 0.85rem;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .field__label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--ink-muted);
+        }
+
+        .field__hint {
+            font-size: 0.72rem;
+            color: var(--ink-soft);
+        }
+
+        .input-text,
+        .input-select,
+        .input-num {
+            width: 100%;
+            padding: 0.7rem 0.9rem;
+            font-family: var(--font-sans);
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--ink);
+            background: var(--surface);
+            border: 1.5px solid var(--border-strong);
+            border-radius: var(--radius-sm);
+            outline: none;
+            transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease), background 0.2s var(--ease);
+        }
+
+        .input-text:hover,
+        .input-select:hover,
+        .input-num:hover {
+            border-color: rgba(13, 110, 99, 0.35);
+            background: #fff;
+        }
+
+        .input-text:focus,
+        .input-select:focus,
+        .input-num:focus {
+            border-color: var(--accent);
+            background: #fff;
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .input-text::placeholder { color: var(--ink-soft); opacity: 0.6; }
+
+        .input-select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7f7a' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.85rem center;
+            padding-right: 2.4rem;
+        }
+
+        .input-num {
+            appearance: textfield;
+            -moz-appearance: textfield;
+            max-width: 180px;
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+            font-size: 1.05rem;
+        }
+
+        .input-num::-webkit-outer-spin-button,
+        .input-num::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .data-box {
+            background: linear-gradient(135deg, var(--surface-tint) 0%, #f0f7f5 100%);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 1.1rem 1rem;
+        }
+
+        .data-box__label {
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.07em;
+            text-transform: uppercase;
+            color: var(--ink-soft);
+            margin-bottom: 0.65rem;
+        }
+
+        .data-box__values {
+            font-size: clamp(1.05rem, 2.5vw, 1.3rem);
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 0.04em;
+            line-height: 1.7;
+            text-align: center;
+        }
+
+        .data-box__hint {
+            margin-top: 0.7rem;
+            font-size: 0.78rem;
+            color: var(--ink-soft);
+            text-align: center;
+        }
+
+        .data-box--compact .data-box__values {
+            font-size: 1rem;
+            line-height: 1.65;
+        }
+
+        .ref-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 0.95rem;
+            margin-top: 0.75rem;
+        }
+
+        .formula-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 0.45rem;
+        }
+
+        .formula-stack span,
+        .formula-tip span {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--ink-muted);
+            background: var(--info-soft);
+            padding: 0.45rem 0.7rem;
+            border-radius: 8px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .formula-tip {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.45rem;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .table-grid {
+            display: grid;
+            grid-template-columns:
+                minmax(64px, 0.8fr)
+                minmax(72px, 1fr)
+                minmax(72px, 1fr)
+                minmax(80px, 1.1fr)
+                minmax(72px, 1fr);
+            min-width: 480px;
+        }
+
+        .grid-header {
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+            color: var(--ink-muted);
+            background: var(--surface-tint);
+            padding: 0.7rem 0.4rem;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+            line-height: 1.25;
+        }
+
+        .grid-cell {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem 0.3rem;
+            border-bottom: 1px solid var(--border);
+            background: var(--surface-elevated);
+        }
+
+        .grid-cell:nth-last-child(-n+5) { border-bottom: none; }
+
+        .grid-cell--value {
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            font-size: 1rem;
+            color: var(--accent);
+            background: rgba(13, 110, 99, 0.04);
+        }
+
+        .table-grid .input-num {
+            max-width: 76px;
+            padding: 0.48rem 0.35rem;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .field-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.9rem;
+        }
+
+        /* Guías de gráficas */
+        .graph-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            margin-bottom: 0.9rem;
+        }
+
+        .graph-tab {
+            font-family: var(--font-sans);
+            font-size: 0.78rem;
+            font-weight: 600;
+            padding: 0.5rem 0.75rem;
+            border-radius: 999px;
+            border: 1.5px solid var(--border-strong);
+            background: var(--surface);
+            color: var(--ink-muted);
+            cursor: pointer;
+            transition: background 0.2s var(--ease), border-color 0.2s var(--ease), color 0.2s var(--ease);
+        }
+
+        .graph-tab:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .graph-tab.is-active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+        }
+
+        .graph-panel { display: none; }
+        .graph-panel.is-active { display: block; animation: stepIn 0.35s var(--ease) both; }
+
+        .graph-panel__title {
+            font-family: var(--font-serif);
+            font-size: 1.05rem;
+            font-weight: 600;
+            margin-bottom: 0.35rem;
+        }
+
+        .graph-panel__intro {
+            font-size: 0.85rem;
+            color: var(--ink-muted);
+            margin-bottom: 0.85rem;
+        }
+
+        .howto {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.55rem;
+            margin-bottom: 0.9rem;
+        }
+
+        .howto__item {
+            display: grid;
+            grid-template-columns: 28px 1fr;
+            gap: 0.65rem;
+            align-items: start;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 0.65rem 0.75rem;
+        }
+
+        .howto__num {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--accent-soft);
+            color: var(--accent);
+            font-size: 0.78rem;
+            font-weight: 700;
+            display: grid;
+            place-items: center;
+        }
+
+        .howto__text {
+            font-size: 0.84rem;
+            color: var(--ink-muted);
+            line-height: 1.45;
+        }
+
+        .howto__text strong { color: var(--ink); font-weight: 600; }
+
+        .graph-preview {
+            background: linear-gradient(145deg, #f0f7f5 0%, #eaf3f8 100%);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 0.75rem;
+            margin-bottom: 0.85rem;
+            text-align: center;
+        }
+
+        .graph-preview svg {
+            width: 100%;
+            max-width: 220px;
+            height: auto;
+        }
+
+        .graph-preview__caption {
+            font-size: 0.72rem;
+            color: var(--ink-soft);
+            margin-top: 0.35rem;
+        }
+
+        .check-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.55rem;
+        }
+
+        .check-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.65rem;
+            padding: 0.7rem 0.8rem;
+            background: var(--surface);
+            border: 1.5px solid var(--border-strong);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: border-color 0.2s var(--ease), background 0.2s var(--ease);
+        }
+
+        .check-item:hover { border-color: rgba(13, 110, 99, 0.35); }
+
+        .check-item:has(input:checked) {
+            border-color: var(--accent);
+            background: var(--accent-soft);
+        }
+
+        .check-item input {
+            margin-top: 0.15rem;
+            width: 1.05rem;
+            height: 1.05rem;
+            accent-color: var(--accent);
+            flex-shrink: 0;
+        }
+
+        .check-item__body { min-width: 0; }
+        .check-item__title {
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--ink);
+        }
+        .check-item__hint {
+            font-size: 0.75rem;
+            color: var(--ink-soft);
+            margin-top: 0.15rem;
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.65rem;
+            align-items: center;
+            margin-top: 0.15rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.45rem;
+            font-family: var(--font-sans);
+            font-size: 0.92rem;
+            font-weight: 600;
+            padding: 0.75rem 1.2rem;
+            border-radius: var(--radius-sm);
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s var(--ease), color 0.2s var(--ease),
+                box-shadow 0.2s var(--ease), transform 0.15s var(--ease), opacity 0.2s var(--ease);
+        }
+
+        .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+        .btn:active:not(:disabled) { transform: scale(0.97); }
+
+        .btn--primary {
+            background: var(--accent);
+            color: #fff;
+            box-shadow: 0 2px 8px var(--accent-glow);
+        }
+        .btn--primary:hover:not(:disabled) {
+            background: var(--accent-hover);
+            box-shadow: 0 4px 14px var(--accent-glow);
+        }
+
+        .btn--ghost {
+            background: transparent;
+            color: var(--ink-muted);
+            border: 1.5px solid var(--border-strong);
+        }
+        .btn--ghost:hover:not(:disabled) {
+            background: var(--surface-tint);
+            color: var(--ink);
+        }
+
+        .btn:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
+        .btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+        .success { text-align: center; padding: 1.5rem 0.5rem 0.5rem; }
+        .success__icon {
+            width: 72px; height: 72px;
+            margin: 0 auto 1.25rem;
+            border-radius: 50%;
+            background: var(--success-soft);
+            color: var(--success);
+            display: grid;
+            place-items: center;
+            animation: popIn 0.5s var(--ease) 0.15s both;
+        }
+        .success__icon svg { width: 36px; height: 36px; }
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.7); }
+            to   { opacity: 1; transform: scale(1); }
+        }
+        .success .step__heading { margin-bottom: 0.6rem; }
+        .success .step__lead { margin: 0 auto; text-align: center; }
+
+        .footer-note {
+            text-align: center;
+            font-size: 0.76rem;
+            color: var(--ink-soft);
+            padding: 0.15rem 0 0.5rem;
+            animation: fadeUp 0.6s var(--ease) 0.2s both;
+        }
+
+        /* ── Desktop / proyector: dos columnas ── */
+        @media (min-width: 900px) {
+            .split {
+                grid-template-columns: minmax(280px, 0.95fr) minmax(320px, 1.15fr);
+                gap: 1.35rem;
+            }
+
+            .split__ref {
+                position: sticky;
+                top: 0.75rem;
+                align-self: start;
+            }
+
+            .split--wide {
+                grid-template-columns: minmax(240px, 0.75fr) minmax(400px, 1.35fr);
+            }
+
+            .briefing { margin-bottom: 0.75rem; }
+            .guide { margin-bottom: 0; }
+        }
+
+        /* ── Modo proyector (activado por botón) ── */
+        body.is-projector {
+            --app-max: 1360px;
+            padding: 0.65rem 1.25rem 1rem;
+            font-size: 1.05rem;
+        }
+
+        body.is-projector .brand__title {
+            font-size: clamp(1.7rem, 2.8vw, 2.35rem);
+        }
+
+        body.is-projector .brand__subtitle { font-size: 1rem; }
+
+        body.is-projector .step__heading {
+            font-size: clamp(1.4rem, 2.2vw, 1.7rem);
+        }
+
+        body.is-projector .briefing__body,
+        body.is-projector .field__label,
+        body.is-projector .data-box__values {
+            font-size: 1.02rem;
+        }
+
+        body.is-projector .input-text,
+        body.is-projector .input-select,
+        body.is-projector .input-num {
+            font-size: 1.05rem;
+            padding: 0.85rem 1rem;
+        }
+
+        body.is-projector .panel {
+            padding: 1.35rem 1.5rem 1.5rem;
+        }
+
+        body.is-projector .footer-note { display: none; }
+
+        body.is-projector .topbar {
+            align-items: center;
+        }
+
+        @media (min-width: 900px) {
+            body.is-projector .split {
+                grid-template-columns: minmax(340px, 1fr) minmax(400px, 1.15fr);
+                gap: 1.5rem;
+            }
+
+            body.is-projector .split--wide {
+                grid-template-columns: minmax(280px, 0.7fr) minmax(520px, 1.4fr);
+            }
+
+            /* Altura útil: referencia visible sin bajar toda la página */
+            body.is-projector .split__ref {
+                max-height: calc(100dvh - 11rem);
+                overflow-y: auto;
+                padding-right: 0.35rem;
+                scrollbar-width: thin;
+            }
+
+            body.is-projector .split__work {
+                max-height: calc(100dvh - 11rem);
+                overflow-y: auto;
+                padding-right: 0.25rem;
+                scrollbar-width: thin;
+            }
+        }
+
+        @media (max-width: 899px) {
+            .topbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .projector-toggle { align-self: flex-start; }
+        }
+
+        @media (max-width: 600px) {
+            body { padding: 0.75rem; }
+            .guide { grid-template-columns: 1fr; }
+            .stepper { padding: 0.8rem 0.45rem 0.95rem; }
+            .stepper__dot { width: 28px; height: 28px; font-size: 0.65rem; }
+            .stepper__bar { top: 14px; }
+            .stepper__label { font-size: 0.55rem; max-width: 3.6rem; }
+            .actions { flex-direction: column; align-items: stretch; }
+            .btn { width: 100%; }
+            .input-num { max-width: none; }
+            .table-grid .input-num { max-width: 68px; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app">
+
+    <div class="topbar">
+        <header class="brand">
+            <p class="brand__eyebrow">Matemáticas · 7.º grado</p>
+            <h1 class="brand__title">Laboratorio de Estadística</h1>
+            <p class="brand__subtitle">
+                Investigación aplicada: residuos reciclables en el colegio. Tú eres el analista de datos.
+            </p>
+        </header>
+        <button type="button" class="projector-toggle" id="btnProjector" aria-pressed="false" title="Ideal para proyectar en el aula">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="2" y="3" width="20" height="14" rx="2"/>
+                <path d="M8 21h8M12 17v4"/>
+            </svg>
+            Modo proyector
+        </button>
+    </div>
+
+    <nav class="stepper" aria-label="Progreso del laboratorio" id="stepper">
+        <div class="stepper__track">
+            <div class="stepper__bar" aria-hidden="true">
+                <div class="stepper__bar-fill" id="progressFill"></div>
+            </div>
+            <div class="stepper__item is-active" data-step="1">
+                <span class="stepper__dot" id="dot1">1</span>
+                <span class="stepper__label">Contexto</span>
+                <span class="stepper__time">6 min</span>
+            </div>
+            <div class="stepper__item" data-step="2">
+                <span class="stepper__dot" id="dot2">2</span>
+                <span class="stepper__label">Datos</span>
+                <span class="stepper__time">3 min</span>
+            </div>
+            <div class="stepper__item" data-step="3">
+                <span class="stepper__dot" id="dot3">3</span>
+                <span class="stepper__label">Tabla</span>
+                <span class="stepper__time">12 min</span>
+            </div>
+            <div class="stepper__item" data-step="4">
+                <span class="stepper__dot" id="dot4">4</span>
+                <span class="stepper__label">Análisis</span>
+                <span class="stepper__time">8 min</span>
+            </div>
+            <div class="stepper__item" data-step="5">
+                <span class="stepper__dot" id="dot5">5</span>
+                <span class="stepper__label">Gráficas</span>
+                <span class="stepper__time">12 min</span>
+            </div>
+            <div class="stepper__item" data-step="Final">
+                <span class="stepper__dot" id="dotFinal">✓</span>
+                <span class="stepper__label">Enviado</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Temporizador de la fase activa -->
+    <div class="timer-bar" id="timerBar" role="timer" aria-live="polite" aria-atomic="true">
+        <div class="timer-bar__clock">
+            <div>
+                <div class="timer-bar__label">Tiempo</div>
+                <div class="timer-bar__time" id="timerDisplay">06:00</div>
+            </div>
+        </div>
+        <div class="timer-bar__meta">
+            <p class="timer-bar__phase" id="timerPhaseLabel">Fase 1 · Contexto — 6 minutos</p>
+            <div class="timer-bar__track" aria-hidden="true">
+                <div class="timer-bar__fill" id="timerFill"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="timer-toast" id="timerToast" role="status" aria-live="assertive"></div>
+
+    <main class="panel">
+
+        <!-- ═══════════ PASO 1: Contexto (split) ═══════════ -->
+        <section id="step1" class="step active" aria-labelledby="heading1">
+            <div class="step__intro">
+                <span class="step__badge">Fase 01 · Lectura</span>
+                <h2 class="step__heading" id="heading1">Contexto de la investigación</h2>
+                <p class="step__lead">
+                    A la izquierda el informe. A la derecha, responde sin perder de vista el contexto.
+                    Tienes <strong>6 minutos</strong>; al terminar el tiempo pasamos a los datos.
+                </p>
+            </div>
+
+            <div class="split">
+                <!-- Columna referencia -->
+                <aside class="split__ref" aria-label="Informe y conceptos">
+                    <p class="panel-title">Material de lectura</p>
+                    <article class="briefing">
+                        <div class="briefing__meta">
+                            <span class="chip">Informe interno</span>
+                            <span class="chip chip--accent">Comité Ambiental</span>
+                            <span class="chip">Semana 12 · 2026</span>
+                        </div>
+                        <h3 class="briefing__title">Proyecto “Campus Limpio”: medición de residuos reciclables</h3>
+                        <div class="briefing__body">
+                            <p>
+                                El colegio cuenta con <strong>42 zonas</strong> de recolección de residuos
+                                (cafetería, patios, aulas, laboratorios, biblioteca, canchas y pasillos).
+                                El Comité Ambiental necesita saber cuántos kilogramos de material reciclable
+                                se acumulan cada semana para diseñar un plan de reciclaje más eficiente.
+                            </p>
+                            <p>
+                                Por tiempo y recursos, el equipo no pudo medir las 42 zonas. Seleccionó al azar
+                                <strong>15 zonas</strong> y registró, durante una semana, los kilogramos de
+                                residuos reciclables recolectados en cada una.
+                            </p>
+                            <p>
+                                Tu rol es el de <strong>analista de datos</strong>: interpretar el estudio,
+                                organizar la información y calcular medidas para el Comité.
+                            </p>
+                            <p class="briefing__callout">
+                                Pregunta del Comité: ¿cuánto material reciclable se recolecta típicamente por zona,
+                                y qué valores se repiten más?
+                            </p>
+                        </div>
+                    </article>
+
+                    <div class="guide" aria-label="Recordatorio de conceptos">
+                        <div class="guide__item">
+                            <p class="guide__term">Población</p>
+                            <p class="guide__def">Conjunto completo de elementos que se quiere estudiar.</p>
+                        </div>
+                        <div class="guide__item">
+                            <p class="guide__term">Muestra</p>
+                            <p class="guide__def">Parte de la población que sí se observa o mide.</p>
+                        </div>
+                        <div class="guide__item">
+                            <p class="guide__term">Variable</p>
+                            <p class="guide__def">Característica que se mide en cada elemento.</p>
+                        </div>
+                        <div class="guide__item">
+                            <p class="guide__term">Tipo</p>
+                            <p class="guide__def">Cualitativa o cuantitativa (discreta / continua).</p>
+                        </div>
+                    </div>
+                </aside>
+
+                <!-- Columna trabajo -->
+                <div class="split__work">
+                    <p class="panel-title">Responde aquí</p>
+                    <div class="concept-grid">
+                        <div class="field">
+                            <label class="field__label" for="inputPoblacion">¿Cuál es la población?</label>
+                            <input class="input-text" type="text" id="inputPoblacion"
+                                placeholder="¿Qué se quiere estudiar en total?"
+                                autocomplete="off">
+                            <span class="field__hint">Pista: piensa en “todas las…” zonas del colegio.</span>
+                        </div>
+                        <div class="field">
+                            <label class="field__label" for="inputMuestra">¿Cuál es la muestra?</label>
+                            <input class="input-text" type="text" id="inputMuestra"
+                                placeholder="¿Qué parte sí se midió?"
+                                autocomplete="off">
+                            <span class="field__hint">Pista: ¿cuántas zonas se seleccionaron al azar?</span>
+                        </div>
+                        <div class="field">
+                            <label class="field__label" for="inputVariable">¿Cuál es la variable?</label>
+                            <input class="input-text" type="text" id="inputVariable"
+                                placeholder="¿Qué se midió en cada zona?"
+                                autocomplete="off">
+                            <span class="field__hint">Pista: se expresa en kilogramos (kg).</span>
+                        </div>
+                        <div class="field">
+                            <label class="field__label" for="inputTipoVariable">¿Qué tipo de variable es?</label>
+                            <select class="input-select" id="inputTipoVariable">
+                                <option value="" disabled selected>Selecciona una opción…</option>
+                                <option value="cualitativa">Cualitativa (cualidades o categorías)</option>
+                                <option value="cuantitativa_discreta">Cuantitativa discreta (números que se cuentan)</option>
+                                <option value="cuantitativa_continua">Cuantitativa continua (números que se miden)</option>
+                            </select>
+                            <span class="field__hint">El peso en kg se mide y puede tomar valores intermedios.</span>
+                        </div>
+                    </div>
+                    <div class="actions">
+                        <button type="button" class="btn btn--primary" onclick="nextStep(2)">
+                            Continuar a los datos
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════ PASO 2: Datos ═══════════ -->
+        <section id="step2" class="step" aria-labelledby="heading2">
+            <div class="step__intro">
+                <span class="step__badge">Fase 02 · Recolección</span>
+                <h2 class="step__heading" id="heading2">Datos de campo</h2>
+                <p class="step__lead">
+                    Estos son los kilogramos de las 15 zonas. Cópialos en tu cuaderno.
+                    Tienes <strong>3 minutos</strong>; luego pasamos a la tabla.
+                </p>
+            </div>
+            <div class="data-box">
+                <p class="data-box__label">Registro de campo · 15 zonas (kg / semana)</p>
+                <div class="data-box__values raw-data" aria-live="polite"></div>
+                <p class="data-box__hint">Cada estudiante recibe un conjunto distinto — tu muestra es única.</p>
+            </div>
+            <div class="actions" style="margin-top: 1.15rem;">
+                <button type="button" class="btn btn--ghost" onclick="nextStep(1)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
+                    Volver
+                </button>
+                <button type="button" class="btn btn--primary" onclick="nextStep(3)">
+                    Ya copié los datos
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                </button>
+            </div>
+        </section>
+
+        <!-- ═══════════ PASO 3: Tabla (split) ═══════════ -->
+        <section id="step3" class="step" aria-labelledby="heading3">
+            <div class="step__intro">
+                <span class="step__badge">Fase 03 · Organización</span>
+                <h2 class="step__heading" id="heading3">Tabla de frecuencias</h2>
+                <p class="step__lead">
+                    Datos y fórmulas a la izquierda. Completa la tabla a la derecha.
+                    Tienes <strong>12 minutos</strong>; al acabarse pasamos al análisis.
+                </p>
+            </div>
+
+            <div class="split split--wide">
+                <aside class="split__ref" aria-label="Datos y fórmulas">
+                    <p class="panel-title">Referencia</p>
+                    <div class="data-box data-box--compact">
+                        <p class="data-box__label">Datos de la muestra (kg)</p>
+                        <div class="data-box__values raw-data"></div>
+                    </div>
+                    <div class="ref-card">
+                        <p class="panel-title" style="margin-bottom: 0.5rem;">Fórmulas</p>
+                        <div class="formula-stack">
+                            <span>n = 15</span>
+                            <span>fr = f ÷ n</span>
+                            <span>% = fr × 100</span>
+                            <span>Σf = 15 · Σfr ≈ 1 · Σ% ≈ 100</span>
+                        </div>
+                    </div>
+                </aside>
+
+                <div class="split__work">
+                    <p class="panel-title">Completa la tabla</p>
+                    <div class="table-wrap">
+                        <div class="table-grid" id="frequencyTable" role="table" aria-label="Tabla de frecuencias completa">
+                            <div class="grid-header" role="columnheader">Dato<br>(kg)</div>
+                            <div class="grid-header" role="columnheader">f<br>absoluta</div>
+                            <div class="grid-header" role="columnheader">F<br>acumulada</div>
+                            <div class="grid-header" role="columnheader">fr<br>relativa</div>
+                            <div class="grid-header" role="columnheader">%<br>porcentaje</div>
+                        </div>
+                    </div>
+                    <div class="actions">
+                        <button type="button" class="btn btn--ghost" onclick="nextStep(2)">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
+                            Volver
+                        </button>
+                        <button type="button" class="btn btn--primary" onclick="nextStep(4)">
+                            Guardar e ir a análisis
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════ PASO 4: Análisis (split) ═══════════ -->
+        <section id="step4" class="step" aria-labelledby="heading4">
+            <div class="step__intro">
+                <span class="step__badge">Fase 04 · Análisis</span>
+                <h2 class="step__heading" id="heading4">Medidas de tendencia central</h2>
+                <p class="step__lead">
+                    Mantén los datos visibles mientras calculas media y moda.
+                    Tienes <strong>8 minutos</strong>; luego pasamos a las gráficas.
+                </p>
+            </div>
+
+            <div class="split">
+                <aside class="split__ref" aria-label="Datos para el análisis">
+                    <p class="panel-title">Referencia</p>
+                    <div class="data-box data-box--compact">
+                        <p class="data-box__label">Datos de la muestra (kg)</p>
+                        <div class="data-box__values raw-data"></div>
+                    </div>
+                    <div class="ref-card">
+                        <p class="panel-title" style="margin-bottom: 0.5rem;">Recuerda</p>
+                        <div class="formula-stack">
+                            <span>Media = suma ÷ n</span>
+                            <span>n = 15</span>
+                            <span>Moda = valor que más se repite</span>
+                        </div>
+                    </div>
+                </aside>
+
+                <div class="split__work">
+                    <p class="panel-title">Resultados</p>
+                    <div class="field-group">
+                        <div class="field">
+                            <label class="field__label" for="inputMedia">Media aritmética (kg)</label>
+                            <input class="input-num" type="number" id="inputMedia" step="0.01" placeholder="Ej. 3.47" inputmode="decimal">
+                            <span class="field__hint">Suma de todos los datos ÷ 15</span>
+                        </div>
+                        <div class="field">
+                            <label class="field__label" for="inputModa">Moda (kg)</label>
+                            <input class="input-num" type="number" id="inputModa" placeholder="Ej. 4" inputmode="numeric">
+                            <span class="field__hint">El valor (o valores) que más se repite(n)</span>
+                        </div>
+                    </div>
+                    <div class="actions">
+                        <button type="button" class="btn btn--ghost" onclick="nextStep(3)">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
+                            Volver
+                        </button>
+                        <button type="button" class="btn btn--primary" onclick="nextStep(5)">
+                            Continuar a gráficas
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════ PASO 5: Gráficas ═══════════ -->
+        <section id="step5" class="step" aria-labelledby="heading5">
+            <div class="step__intro">
+                <span class="step__badge">Fase 05 · Representación</span>
+                <h2 class="step__heading" id="heading5">Cómo construir las gráficas</h2>
+                <p class="step__lead">
+                    Sigue cada guía punto por punto y dibuja en tu cuaderno.
+                    Tienes <strong>12 minutos</strong>; al acabarse se envía el informe.
+                </p>
+            </div>
+
+            <div class="split split--wide">
+                <aside class="split__ref" aria-label="Datos y checklist">
+                    <p class="panel-title">Tus datos</p>
+                    <div class="data-box data-box--compact">
+                        <p class="data-box__label">Muestra (kg)</p>
+                        <div class="data-box__values raw-data"></div>
+                    </div>
+                    <div class="ref-card">
+                        <p class="panel-title" style="margin-bottom: 0.5rem;">Fórmulas útiles</p>
+                        <div class="formula-stack">
+                            <span>n = 15</span>
+                            <span>Altura de barra = f</span>
+                            <span>Ángulo = (f ÷ n) × 360°</span>
+                            <span>Ángulo = % × 3,6°</span>
+                        </div>
+                    </div>
+                    <div class="ref-card" style="margin-top: 0.75rem;">
+                        <p class="panel-title" style="margin-bottom: 0.55rem;">Marca lo que ya dibujaste</p>
+                        <div class="check-list">
+                            <label class="check-item">
+                                <input type="checkbox" id="checkHistograma">
+                                <span class="check-item__body">
+                                    <span class="check-item__title">Histograma</span>
+                                    <span class="check-item__hint">Barras pegadas · eje X = kg · eje Y = f</span>
+                                </span>
+                            </label>
+                            <label class="check-item">
+                                <input type="checkbox" id="checkPoligono">
+                                <span class="check-item__body">
+                                    <span class="check-item__title">Polígono de frecuencias</span>
+                                    <span class="check-item__hint">Puntos unidos · empieza y termina en 0</span>
+                                </span>
+                            </label>
+                            <label class="check-item">
+                                <input type="checkbox" id="checkCircular">
+                                <span class="check-item__body">
+                                    <span class="check-item__title">Diagrama circular</span>
+                                    <span class="check-item__hint">Sectores con ángulos calculados</span>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+                </aside>
+
+                <div class="split__work">
+                    <p class="panel-title">Guías paso a paso</p>
+                    <div class="graph-tabs" role="tablist" aria-label="Tipo de gráfica">
+                        <button type="button" class="graph-tab is-active" role="tab" aria-selected="true" data-graph="histograma">Histograma</button>
+                        <button type="button" class="graph-tab" role="tab" aria-selected="false" data-graph="poligono">Polígono</button>
+                        <button type="button" class="graph-tab" role="tab" aria-selected="false" data-graph="circular">Circular</button>
+                    </div>
+
+                    <!-- Histograma -->
+                    <div class="graph-panel is-active" id="panel-histograma" role="tabpanel">
+                        <h3 class="graph-panel__title">Histograma de frecuencias</h3>
+                        <p class="graph-panel__intro">
+                            Representa cada valor de kg con una barra cuya altura es la frecuencia absoluta (f).
+                            En datos discretos (2, 3, 4, 5…) las barras van <strong>pegadas o muy juntas</strong>.
+                        </p>
+                        <div class="graph-preview" aria-hidden="true">
+                            <svg viewBox="0 0 200 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <line x1="24" y1="100" x2="190" y2="100" stroke="#3d524e" stroke-width="1.5"/>
+                                <line x1="24" y1="100" x2="24" y2="14" stroke="#3d524e" stroke-width="1.5"/>
+                                <rect x="40" y="70" width="28" height="30" fill="#0d6e63" opacity="0.85"/>
+                                <rect x="68" y="40" width="28" height="60" fill="#0d6e63" opacity="0.85"/>
+                                <rect x="96" y="55" width="28" height="45" fill="#0d6e63" opacity="0.85"/>
+                                <rect x="124" y="28" width="28" height="72" fill="#0d6e63" opacity="0.85"/>
+                                <text x="50" y="114" font-size="9" fill="#6b7f7a" font-family="Outfit,sans-serif">2</text>
+                                <text x="78" y="114" font-size="9" fill="#6b7f7a" font-family="Outfit,sans-serif">3</text>
+                                <text x="106" y="114" font-size="9" fill="#6b7f7a" font-family="Outfit,sans-serif">4</text>
+                                <text x="134" y="114" font-size="9" fill="#6b7f7a" font-family="Outfit,sans-serif">5</text>
+                                <text x="8" y="74" font-size="8" fill="#6b7f7a" font-family="Outfit,sans-serif">f</text>
+                            </svg>
+                            <p class="graph-preview__caption">Ejemplo: eje X = kg · eje Y = frecuencia (f)</p>
+                        </div>
+                        <ol class="howto">
+                            <li class="howto__item">
+                                <span class="howto__num">1</span>
+                                <span class="howto__text">Dibuja dos ejes: horizontal (<strong>X = kilogramos</strong>) y vertical (<strong>Y = frecuencia f</strong>).</span>
+                            </li>
+                            <li class="howto__item">
+                                <span class="howto__num">2</span>
+                                <span class="howto__text">Marca en X cada valor de tu tabla (por ejemplo 2, 3, 4, 5) con la misma separación.</span>
+                            </li>
+                            <li class="howto__item">
+                                <span class="howto__num">3</span>
+                                <span class="howto__text">En Y numera de 0 hasta el <strong>f máximo</strong> de tu tabla (de 1 en 1).</span>
+                            </li>
+                            <li class="howto__item">
+                                <span class="howto__num">4</span>
+                                <span class="howto__text">Sobre cada valor de X, dibuja una <strong>barra de altura = f</strong> de ese valor. Las barras deben tocarse o quedar muy juntas.</span>
+                            </li>
+                            <li class="howto__item">
+                                <span class="howto__num">5</span>
+                                <span class="howto__text">Pon título: <strong>“Histograma — residuos reciclables (kg)”</strong> y una leyenda si tu docente la pide.</span>
+                            </li>
+                        </ol>
+                    </div>
+
+                    <!-- Polígono -->
+                    <div class="graph-panel" id="panel-poligono" role="tabpanel" hidden>
+                        <h3 class="graph-panel__title">Polígono de frecuencias</h3>
+                        <p class="graph-panel__intro">
+                            Une con líneas los puntos <strong>(valor, f)</strong>. Para que cierre bien, se agrega un punto
+                            antes del primer valor y después del último con frecuencia 0.
+                        </p>
+                        <div class="graph-preview" aria-hidden="true">
+                            <svg viewBox="0 0 200 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <line x1="24" y1="100" x2="190" y2="100" stroke="#3d524e" stroke-width="1.5"/>
+                                <line x1="24" y1="100" x2="24" y2="14" stroke="#3d524e" stroke-width="1.5"/>
+                                <polyline points="36,100 54,70 82,40 110,55 138,28 166,100" stroke="#0d6e63" stroke-width="2.5" fill="none" stroke-linejoin="round"/>
+                                <circle cx="36" cy="100" r="3.5" fill="#0d6e63"/>
+                                <circle cx="54" cy="70" r="3.5" fill="#0d6e63"/>
+                                <circle cx="82" cy="40" r="3.5" fill="#0d6e63"/>
+                                <circle cx="110" cy="55" r="3.5" fill="#0d6e63"/>
+                                <circle cx="138" cy="28" r="3.5" fill="#0d6e63"/>
+                                <circle cx="166" cy="100" r="3.5" fill="#0d6e63"/>
+                                <text x="50" y="114" font-size="9" fill="#6b7f7a" font-family="Outfit,sans-serif">2</text>
+                                <text x="78" y="114" font-size="9" fill="#6b7f7a" font-family="Outfit,sans-serif">3</text>
+                                <text x="106" y="114" font-size="9" fill="#6b7f7a" font-family="Outfit,sans-serif">4</text>
+                                <text x="134" y="114" font-size="9" fill="#6b7f7a" font-family="Outfit,sans-serif">5</text>
+                            </svg>
+                            <p class="graph-preview__caption">Ejemplo: puntos unidos · extremos en f = 0</p>
+                        </div>
+                        <ol class="howto">
+                            <li class="howto__item">
+                                <span class="howto__num">1</span>
+                                <span class="howto__text">Dibuja los mismos ejes X (kg) e Y (f) que en el histograma.</span>
+                            </li>
+                            <li class="howto__item">
+                                <span class="howto__num">2</span>
+                                <span class="howto__text">Coloca un punto en <strong>(valor − 1, 0)</strong> — justo antes del primer dato, con f = 0.</span>
+                            </li>
+                            <li class="howto__item">
+                                <span class="howto__num">3</span>
+                                <span class="howto__text">Marca un punto en el centro de cada valor: coordenada <strong>(kg, f)</strong> según tu tabla.</span>
+                            </li>
+                            <li class="howto__item">
+                                <span class="howto__num">4</span>
+                                <span class="howto__text">Coloca un punto final en <strong>(último valor + 1, 0)</strong>.</span>
+                            </li>
+                            <li class="howto__item">
+                                <span class="howto__num">5</span>
+                                <span class="howto__text">Une todos los puntos con <strong>segmentos rectos</strong>, en orden de izquierda a derecha. Título: <strong>“Polígono de frecuencias”</strong>.</span>
+                            </li>
+                        </ol>
+                    </div>
+
+                    <!-- Circular -->
+                    <div class="graph-panel" id="panel-circular" role="tabpanel" hidden>
+                        <h3 class="graph-panel__title">Diagrama circular (pastel)</h3>
+                        <p class="graph-panel__intro">
+                            Cada valor ocupa un <strong>sector del círculo</strong>. El ángulo se calcula con la frecuencia
+                            o con el porcentaje de tu tabla.
+                        </p>
+                        <div class="graph-preview" aria-hidden="true">
+                            <svg viewBox="0 0 200 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="100" cy="58" r="42" fill="#e8f2ef" stroke="#0d6e63" stroke-width="1.5"/>
+                                <path d="M100 58 L100 16 A42 42 0 0 1 138 78 Z" fill="#0d6e63" opacity="0.9"/>
+                                <path d="M100 58 L138 78 A42 42 0 0 1 70 90 Z" fill="#1a9b88" opacity="0.75"/>
+                                <path d="M100 58 L70 90 A42 42 0 0 1 100 16 Z" fill="#2a9d8f" opacity="0.55"/>
+                                <text x="118" y="42" font-size="8" fill="#0f1c1a" font-family="Outfit,sans-serif">°</text>
+                            </svg>
+                            <p class="graph-preview__caption">Ejemplo: cada sector = un valor de kg</p>
+                        </div>
+                        <ol class="howto">
+                            <li class="howto__item">
+                                <span class="howto__num">1</span>
+                                <span class="howto__text">Dibuja un <strong>círculo</strong> grande con el compás (o a mano, lo más regular posible).</span>
+                            </li>
+                            <li class="howto__item">
+                                <span class="howto__num">2</span>
+                                <span class="howto__text">Para cada valor calcula el ángulo:
+                                    <strong>ángulo = (f ÷ 15) × 360°</strong>
+                                    o bien <strong>ángulo = % × 3,6°</strong>.
+                                </span>
+                            </li>
+                            <li class="howto__item">
+                                <span class="howto__num">3</span>
+                                <span class="howto__text">Anota en tu cuaderno una tablita: valor | f | % | ángulo. Verifica que la suma de ángulos ≈ <strong>360°</strong>.</span>
+                            </li>
+                            <li class="howto__item">
+                                <span class="howto__num">4</span>
+                                <span class="howto__text">Desde el centro traza un radio. Con el transportador mide el primer ángulo y marca el sector. Continúa con el siguiente pegado al anterior.</span>
+                            </li>
+                            <li class="howto__item">
+                                <span class="howto__num">5</span>
+                                <span class="howto__text">Colorea cada sector distinto, escribe el valor (kg) y el % dentro o con una leyenda. Título: <strong>“Diagrama circular — residuos (kg)”</strong>.</span>
+                            </li>
+                        </ol>
+                    </div>
+
+                    <div class="actions">
+                        <button type="button" class="btn btn--ghost" onclick="nextStep(4)">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
+                            Volver
+                        </button>
+                        <button type="button" class="btn btn--primary" id="btnSubmit" onclick="submitSimulation()">
+                            Enviar informe al docente
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Confirmación -->
+        <section id="stepFinal" class="step" aria-labelledby="headingFinal">
+            <div class="success">
+                <div class="success__icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+                </div>
+                <h2 class="step__heading" id="headingFinal">¡Informe enviado!</h2>
+                <p class="step__lead">
+                    Tu análisis del proyecto “Campus Limpio” quedó registrado. El docente validará
+                    población, muestra, variable, tabla, medidas y las gráficas dibujadas en el cuaderno.
+                </p>
+            </div>
+        </section>
+
+    </main>
+
+    <p class="footer-note">Cada fase tiene tiempo límite · Al acabarse, avanza sola · Total ≈ 41 min</p>
+</div>
+
+<script>
+    /* ═══════════════════════════════════════════════════════════
+       Laboratorio de Estadística — Lógica + temporizador de clase
+       ═══════════════════════════════════════════════════════════ */
+
+    const STEP_ORDER = [1, 2, 3, 4, 5, 'Final'];
+
+    /**
+     * Tiempos por fase (en minutos).
+     * Total ≈ 41 min → cabe en un periodo de 45 min.
+     * Ajusta aquí si tu clase es más corta o más larga.
+     */
+    const STEP_MINUTES = {
+        1: 6,   // Contexto
+        2: 3,   // Datos
+        3: 12,  // Tabla de frecuencias
+        4: 8,   // Análisis
+        5: 12   // Gráficas
+    };
+
+    const STEP_NAMES = {
+        1: 'Contexto',
+        2: 'Datos',
+        3: 'Tabla',
+        4: 'Análisis',
+        5: 'Gráficas'
+    };
+
+    const NEXT_AFTER = {
+        1: 2,
+        2: 3,
+        3: 4,
+        4: 5,
+        5: 'submit' // al terminar gráficas se envía el informe
+    };
+
+    let currentStep = 1;
+    let isTransitioning = false;
+    let timerInterval = null;
+    let secondsLeft = 0;
+    let secondsTotal = 0;
+
+    const rawData = [];
+    for (let i = 0; i < 15; i++) {
+        rawData.push(Math.floor(Math.random() * 4) + 2);
+    }
+
+    const uniqueValues = [...new Set(rawData)].sort((a, b) => a - b);
+    const SAMPLE_SIZE = rawData.length;
+
+    const CHECK_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>`;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const dataText = rawData.join('  ·  ');
+        document.querySelectorAll('.raw-data').forEach((el) => {
+            el.textContent = dataText;
+        });
+
+        const tableContainer = document.getElementById('frequencyTable');
+        uniqueValues.forEach((val) => {
+            tableContainer.insertAdjacentHTML('beforeend', `
+                <div class="grid-cell grid-cell--value" role="cell">${val}</div>
+                <div class="grid-cell" role="cell">
+                    <input class="input-num" type="number" id="frec_${val}" placeholder="f" step="1" inputmode="numeric" aria-label="Frecuencia absoluta de ${val}">
+                </div>
+                <div class="grid-cell" role="cell">
+                    <input class="input-num" type="number" id="frecAcum_${val}" placeholder="F" step="1" inputmode="numeric" aria-label="Frecuencia acumulada de ${val}">
+                </div>
+                <div class="grid-cell" role="cell">
+                    <input class="input-num" type="number" id="frecRel_${val}" placeholder="fr" step="0.01" inputmode="decimal" aria-label="Frecuencia relativa de ${val}">
+                </div>
+                <div class="grid-cell" role="cell">
+                    <input class="input-num" type="number" id="frecPct_${val}" placeholder="%" step="0.1" inputmode="decimal" aria-label="Porcentaje de ${val}">
+                </div>
+            `);
+        });
+
+        updateStepper(1);
+        initProjectorToggle();
+        initGraphTabs();
+        startStepTimer(1);
+    });
+
+    /* ── Pestañas de guías de gráficas ── */
+    function initGraphTabs() {
+        const tabs = document.querySelectorAll('.graph-tab');
+        tabs.forEach((tab) => {
+            tab.addEventListener('click', () => {
+                const id = tab.dataset.graph;
+                tabs.forEach((t) => {
+                    t.classList.toggle('is-active', t === tab);
+                    t.setAttribute('aria-selected', t === tab ? 'true' : 'false');
+                });
+                document.querySelectorAll('.graph-panel').forEach((panel) => {
+                    const active = panel.id === `panel-${id}`;
+                    panel.classList.toggle('is-active', active);
+                    if (active) panel.removeAttribute('hidden');
+                    else panel.setAttribute('hidden', '');
+                });
+            });
+        });
+    }
+
+    /* ── Temporizador por fase ── */
+    function formatTime(totalSeconds) {
+        const m = Math.floor(totalSeconds / 60);
+        const s = totalSeconds % 60;
+        return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+
+    function stopStepTimer() {
+        if (timerInterval) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+        }
+    }
+
+    function startStepTimer(step) {
+        stopStepTimer();
+
+        const bar = document.getElementById('timerBar');
+        const display = document.getElementById('timerDisplay');
+        const fill = document.getElementById('timerFill');
+        const phaseLabel = document.getElementById('timerPhaseLabel');
+
+        // Sin timer en pantalla final
+        if (step === 'Final' || !STEP_MINUTES[step]) {
+            bar.classList.add('is-hidden');
+            return;
+        }
+
+        bar.classList.remove('is-hidden', 'is-warning', 'is-critical');
+        secondsTotal = STEP_MINUTES[step] * 60;
+        secondsLeft = secondsTotal;
+
+        phaseLabel.textContent = `Fase ${step} · ${STEP_NAMES[step]} — ${STEP_MINUTES[step]} minutos`;
+        display.textContent = formatTime(secondsLeft);
+        fill.style.width = '100%';
+
+        timerInterval = setInterval(() => {
+            secondsLeft -= 1;
+
+            if (secondsLeft <= 0) {
+                secondsLeft = 0;
+                display.textContent = '00:00';
+                fill.style.width = '0%';
+                stopStepTimer();
+                onStepTimeUp(step);
+                return;
+            }
+
+            display.textContent = formatTime(secondsLeft);
+            fill.style.width = `${(secondsLeft / secondsTotal) * 100}%`;
+
+            bar.classList.toggle('is-warning', secondsLeft <= 60 && secondsLeft > 20);
+            bar.classList.toggle('is-critical', secondsLeft <= 20);
+        }, 1000);
+    }
+
+    function showTimerToast(message) {
+        const toast = document.getElementById('timerToast');
+        toast.textContent = message;
+        toast.classList.add('is-visible');
+        setTimeout(() => toast.classList.remove('is-visible'), 2800);
+    }
+
+    function onStepTimeUp(step) {
+        const action = NEXT_AFTER[step];
+        showTimerToast(`¡Tiempo agotado en ${STEP_NAMES[step]}! Pasamos a la siguiente fase.`);
+
+        setTimeout(() => {
+            if (action === 'submit') {
+                submitSimulation({ auto: true });
+            } else {
+                nextStep(action);
+            }
+        }, 600);
+    }
+
+    /* ── Modo proyector ── */
+    function initProjectorToggle() {
+        const btn = document.getElementById('btnProjector');
+        const saved = localStorage.getItem('lab_projector') === '1';
+        setProjectorMode(saved);
+
+        btn.addEventListener('click', () => {
+            const next = !document.body.classList.contains('is-projector');
+            setProjectorMode(next);
+            localStorage.setItem('lab_projector', next ? '1' : '0');
+        });
+    }
+
+    function setProjectorMode(on) {
+        const btn = document.getElementById('btnProjector');
+        document.body.classList.toggle('is-projector', on);
+        btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+        btn.innerHTML = on
+            ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg> Salir de proyector`
+            : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg> Modo proyector`;
+    }
+
+    function updateStepper(step) {
+        const idx = STEP_ORDER.indexOf(step);
+        const progressPct = idx <= 0 ? 0 : (idx / (STEP_ORDER.length - 1)) * 100;
+        document.getElementById('progressFill').style.width = `${progressPct}%`;
+
+        STEP_ORDER.forEach((s, i) => {
+            const item = document.querySelector(`.stepper__item[data-step="${s}"]`);
+            const dot = document.getElementById(s === 'Final' ? 'dotFinal' : `dot${s}`);
+            if (!item || !dot) return;
+
+            item.classList.remove('is-active', 'is-done');
+
+            if (i < idx) {
+                item.classList.add('is-done');
+                if (s !== 'Final') dot.innerHTML = CHECK_SVG;
+            } else if (i === idx) {
+                item.classList.add('is-active');
+                dot.textContent = s === 'Final' ? '✓' : String(s);
+            } else {
+                dot.textContent = s === 'Final' ? '✓' : String(s);
+            }
+        });
+    }
+
+    function nextStep(step) {
+        if (isTransitioning || step === currentStep) return;
+
+        const currentEl = document.getElementById('step' + currentStep);
+        const nextEl = document.getElementById('step' + step);
+        if (!nextEl) return;
+
+        stopStepTimer();
+        isTransitioning = true;
+        currentEl.classList.add('leaving');
+        currentEl.classList.remove('active');
+
+        let finished = false;
+        const finish = () => {
+            if (finished) return;
+            finished = true;
+            currentEl.classList.remove('leaving');
+            nextEl.classList.add('active');
+            currentStep = step;
+            updateStepper(step);
+            isTransitioning = false;
+            startStepTimer(step);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (reduced) {
+            finish();
+        } else {
+            currentEl.addEventListener('animationend', finish, { once: true });
+            setTimeout(finish, 320);
+        }
+    }
+
+    /**
+     * submitSimulation({ auto })
+     * Empaqueta el informe para backend. Si auto=true, se disparó por el temporizador.
+     */
+    async function submitSimulation(options = {}) {
+        const { auto = false } = options;
+        stopStepTimer();
+
+        const btn = document.getElementById('btnSubmit');
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = auto ? 'Tiempo agotado · Enviando…' : 'Enviando informe…';
+        }
+
+        const studentData = {
+            contexto: {
+                poblacion: document.getElementById('inputPoblacion').value.trim(),
+                muestra: document.getElementById('inputMuestra').value.trim(),
+                variable: document.getElementById('inputVariable').value.trim(),
+                tipo_variable: document.getElementById('inputTipoVariable').value
+            },
+            raw_data: rawData,
+            n: SAMPLE_SIZE,
+            frecuencias: {},
+            media: parseFloat(document.getElementById('inputMedia').value),
+            moda: parseInt(document.getElementById('inputModa').value, 10),
+            graficas: {
+                histograma: document.getElementById('checkHistograma').checked,
+                poligono: document.getElementById('checkPoligono').checked,
+                circular: document.getElementById('checkCircular').checked
+            },
+            enviado_por_tiempo: auto
+        };
+
+        uniqueValues.forEach((val) => {
+            studentData.frecuencias[val] = {
+                f: document.getElementById(`frec_${val}`).value,
+                F: document.getElementById(`frecAcum_${val}`).value,
+                fr: document.getElementById(`frecRel_${val}`).value,
+                porcentaje: document.getElementById(`frecPct_${val}`).value
+            };
+        });
+
+        console.log('Informe para enviar a la Base de Datos:', studentData);
+
+        // ── CONEXIÓN AL BACKEND (descomentar cuando tengas endpoint) ──
+        // await supabase.from('simulaciones').insert([studentData]);
+        // await fetch('/api/simulaciones', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(studentData) });
+
+        nextStep('Final');
+    }
+</script>
+</body>
+</html>
